@@ -1,0 +1,11 @@
+{
+  "name": "5-qubit Line Chip (illustrative values)",
+  "num_qubits": 5,
+  "edges": [
+    {"a": 0, "b": 1, "error": 0.008},
+    {"a": 1, "b": 2, "error": 0.012},
+    {"a": 2, "b": 3, "error": 0.006},
+    {"a": 3, "b": 4, "error": 0.010}
+  ]
+}
+

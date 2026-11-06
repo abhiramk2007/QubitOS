@@ -1,0 +1,1668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QubitOS - Simulated Quantum Job Scheduler</title>
+  <style>
+    :root {
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --bg-card: #1e293b;
+      --bg-card-hover: #283548;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --border-color: #334155;
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.35);
+      --success: #34d399;
+      --warning: #fbbf24;
+      --danger: #f87171;
+      --highlight: #a855f7;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    [data-theme="light"] {
+      --bg-primary: #f8fafc;
+      --bg-secondary: #f1f5f9;
+      --bg-card: #ffffff;
+      --bg-card-hover: #f8fafc;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --border-color: #cbd5e1;
+      --accent: #0284c7;
+      --accent-glow: rgba(2, 132, 199, 0.25);
+      --success: #059669;
+      --warning: #d97706;
+      --danger: #dc2626;
+      --highlight: #7c3aed;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    /* Accessibility focus ring */
+    :focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    header {
+      background-color: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      padding: 1rem 1.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--accent), var(--highlight));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: #fff;
+      font-family: var(--font-mono);
+    }
+
+    .brand-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+    }
+
+    .brand-subtitle {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+
+    .simulation-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.35rem 0.75rem;
+      background-color: rgba(251, 191, 36, 0.15);
+      border: 1px solid rgba(251, 191, 36, 0.3);
+      color: var(--warning);
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    button, .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      padding: 0.5rem 0.9rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-card);
+      color: var(--text-primary);
+      transition: all 0.15s ease;
+    }
+
+    button:hover:not(:disabled), .btn:hover:not(:disabled) {
+      background-color: var(--bg-card-hover);
+      border-color: var(--accent);
+    }
+
+    button:disabled, .btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background-color: var(--accent);
+      color: #ffffff;
+      border-color: var(--accent);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: #0284c7;
+      border-color: #0284c7;
+    }
+
+    .btn-icon {
+      padding: 0.5rem;
+      min-width: 36px;
+      min-height: 36px;
+    }
+
+    main {
+      flex: 1;
+      padding: 1.5rem;
+      max-width: 1440px;
+      margin: 0 auto;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    /* Empty State */
+    .empty-state {
+      background-color: var(--bg-card);
+      border: 2px dashed var(--border-color);
+      border-radius: 12px;
+      padding: 4rem 2rem;
+      text-align: center;
+      max-width: 720px;
+      margin: 3rem auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.25rem;
+    }
+
+    .empty-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background-color: var(--bg-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+    }
+
+    .empty-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .empty-desc {
+      color: var(--text-secondary);
+      max-width: 520px;
+      font-size: 0.95rem;
+    }
+
+    .empty-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 0.5rem;
+    }
+
+    /* Simulation Dashboard Layout */
+    .dashboard {
+      display: none;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.75rem;
+    }
+
+    .card-title {
+      font-size: 1rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* Top Bar: Mode & Playback */
+    .control-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: space-between;
+      align-items: center;
+      background-color: var(--bg-secondary);
+      padding: 1rem 1.25rem;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+    }
+
+    .mode-select-group {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .mode-select-group label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    select {
+      background-color: var(--bg-card);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      padding: 0.5rem 0.85rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    .playback-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .timeline-group {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex: 1;
+      min-width: 260px;
+    }
+
+    .timeline-slider {
+      flex: 1;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--border-color);
+      outline: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+    }
+
+    .timeline-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      box-shadow: 0 0 8px var(--accent-glow);
+    }
+
+    .time-badge {
+      font-family: var(--font-mono);
+      background-color: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      min-width: 70px;
+      text-align: center;
+    }
+
+    /* Metrics Banner */
+    .metrics-banner {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .metric-box {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .metric-label {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+    }
+
+    .metric-val {
+      font-size: 1.35rem;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      color: var(--accent);
+    }
+
+    /* Grid layout for Main Visualizers */
+    .vis-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 1024px) {
+      .vis-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* SVG Chip Graph */
+    .chip-container {
+      width: 100%;
+      min-height: 220px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    svg.chip-svg {
+      width: 100%;
+      max-height: 240px;
+      overflow: visible;
+    }
+
+    .chip-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      padding-top: 0.5rem;
+      border-top: 1px dashed var(--border-color);
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .legend-swatch {
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+    }
+
+    /* Waiting & Running Queues */
+    .job-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      max-height: 240px;
+      overflow-y: auto;
+      padding-right: 0.25rem;
+    }
+
+    .job-item {
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 0.6rem 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      gap: 0.75rem;
+    }
+
+    .job-item.next-job {
+      border-left: 4px solid var(--accent);
+      background-color: var(--bg-card-hover);
+    }
+
+    .job-tag {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      background-color: rgba(255,255,255,0.08);
+    }
+
+    .prio-pill {
+      font-size: 0.7rem;
+      font-weight: bold;
+      padding: 0.1rem 0.35rem;
+      border-radius: 3px;
+    }
+
+    .prio-3 { background-color: rgba(248, 113, 113, 0.2); color: var(--danger); }
+    .prio-2 { background-color: rgba(251, 191, 36, 0.2); color: var(--warning); }
+    .prio-1 { background-color: rgba(52, 211, 153, 0.2); color: var(--success); }
+
+    /* Space-Time Gantt Chart */
+    .gantt-container {
+      width: 100%;
+      overflow-x: auto;
+      position: relative;
+    }
+
+    svg.gantt-svg {
+      width: 100%;
+      min-width: 600px;
+      height: 180px;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      text-align: left;
+    }
+
+    th {
+      background-color: var(--bg-secondary);
+      padding: 0.65rem 0.75rem;
+      color: var(--text-secondary);
+      font-weight: 600;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    td {
+      padding: 0.65rem 0.75rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    tr:hover td {
+      background-color: var(--bg-card-hover);
+    }
+
+    .winner-cell {
+      background-color: rgba(52, 211, 153, 0.12) !important;
+      font-weight: 700;
+      color: var(--success);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .badge-success { background-color: rgba(52, 211, 153, 0.2); color: var(--success); }
+    .badge-danger { background-color: rgba(248, 113, 113, 0.2); color: var(--danger); }
+
+    /* Log Box */
+    .log-box {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      background-color: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 0.75rem;
+      max-height: 180px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .log-entry {
+      line-height: 1.4;
+      color: var(--text-secondary);
+    }
+
+    .log-entry.active-step {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    footer {
+      border-top: 1px solid var(--border-color);
+      padding: 1.25rem 1.5rem;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      background-color: var(--bg-secondary);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="brand-icon">Q</div>
+      <div>
+        <div class="brand-title">QubitOS Simulator</div>
+        <div class="brand-subtitle">Quantum Job Scheduler & Subgraph Placement Engine</div>
+      </div>
+    </div>
+
+    <div class="simulation-badge" title="No real quantum hardware is accessed.">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+      Simulated Clock • SWAP Estimates
+    </div>
+
+    <div class="header-controls">
+      <input type="file" id="file-input" accept=".json" style="display: none;">
+      <button onclick="document.getElementById('file-input').click()" class="btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="17 8 12 3 7 8"></polyline>
+          <line x1="12" y1="3" x2="12" y2="15"></line>
+        </svg>
+        Load results.json
+      </button>
+
+      <button id="theme-toggle" class="btn btn-icon" title="Toggle Light/Dark Theme" aria-label="Toggle theme">
+        <svg id="theme-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Empty State -->
+    <div id="empty-state" class="empty-state">
+      <div class="empty-icon">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+      </div>
+      <div class="empty-title">No Simulation Results Loaded</div>
+      <div class="empty-desc">
+        Run QubitOS on your exported IBM Composer circuits, then load the generated <code>results.json</code> to explore timeline playback, multi-tenant QPU packing, and policy comparisons.
+      </div>
+      <div class="empty-actions">
+        <button onclick="document.getElementById('file-input').click()" class="btn btn-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          Select results.json
+        </button>
+        <button id="load-sample-btn" class="btn">Load Reference Sample</button>
+      </div>
+    </div>
+
+    <!-- Active Simulation Dashboard -->
+    <div id="dashboard" class="dashboard">
+
+      <!-- Top Control Bar -->
+      <div class="control-bar">
+        <div class="mode-select-group">
+          <label for="mode-select">SCHEDULING MODE:</label>
+          <select id="mode-select"></select>
+        </div>
+
+        <div class="playback-group">
+          <button id="btn-reset" class="btn btn-icon" title="Reset to start">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="19 20 9 12 19 4 19 20"></polygon>
+              <line x1="5" y1="19" x2="5" y2="5"></line>
+            </svg>
+          </button>
+          <button id="btn-step-back" class="btn btn-icon" title="Step Back">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="15 18 9 12 15 6 15 18"></polygon>
+            </svg>
+          </button>
+          <button id="btn-play" class="btn btn-icon btn-primary" title="Play / Pause">
+            <svg id="play-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+          </button>
+          <button id="btn-step-fwd" class="btn btn-icon" title="Step Forward">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="9 18 15 12 9 6 9 18"></polygon>
+            </svg>
+          </button>
+        </div>
+
+        <div class="timeline-group">
+          <input type="range" id="timeline-slider" class="timeline-slider" min="0" max="0" value="0">
+          <div class="time-badge" id="time-badge">t = 0</div>
+          <select id="speed-select" title="Playback Speed" style="padding: 0.3rem 0.5rem; font-size: 0.8rem;">
+            <option value="1500">0.5x</option>
+            <option value="800" selected>1.0x</option>
+            <option value="400">2.0x</option>
+            <option value="150">5.0x</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Mode Key Metrics Banner -->
+      <div class="metrics-banner" id="metrics-banner">
+        <div class="metric-box">
+          <div class="metric-label">Avg Wait Time</div>
+          <div class="metric-val" id="metric-avgwt">-</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Avg Turnaround</div>
+          <div class="metric-val" id="metric-avgtat">-</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Makespan</div>
+          <div class="metric-val" id="metric-makespan">-</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Utilization</div>
+          <div class="metric-val" id="metric-util">-</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Deadline Misses</div>
+          <div class="metric-val" id="metric-misses">-</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Total SWAPs</div>
+          <div class="metric-val" id="metric-swaps">-</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Max Wait</div>
+          <div class="metric-val" id="metric-maxwait">-</div>
+        </div>
+      </div>
+
+      <!-- Main Visualizers Grid: Interactive QPU Chip + Waiting/Running Queue -->
+      <div class="vis-grid">
+        <!-- Physical Chip Topology -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect>
+                <rect x="9" y="9" width="6" height="6"></rect>
+                <line x1="9" y1="1" x2="9" y2="4"></line>
+                <line x1="15" y1="1" x2="15" y2="4"></line>
+                <line x1="9" y1="20" x2="9" y2="23"></line>
+                <line x1="15" y1="20" x2="15" y2="23"></line>
+                <line x1="20" y1="9" x2="23" y2="9"></line>
+                <line x1="20" y1="14" x2="23" y2="14"></line>
+                <line x1="1" y1="9" x2="4" y2="9"></line>
+                <line x1="1" y1="14" x2="4" y2="14"></line>
+              </svg>
+              Physical QPU Graph & Subgraph Placement
+            </div>
+            <span id="chip-name" style="font-size: 0.8rem; color: var(--text-secondary);"></span>
+          </div>
+
+          <div class="chip-container">
+            <svg id="chip-svg" class="chip-svg"></svg>
+          </div>
+
+          <div class="chip-legend">
+            <div class="legend-item">
+              <div class="legend-swatch" style="background: #34d399;"></div>
+              <span>Low Error</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-swatch" style="background: #fbbf24;"></div>
+              <span>Medium</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-swatch" style="background: #f87171;"></div>
+              <span>High Error</span>
+            </div>
+            <div class="legend-item" style="margin-left: auto;">
+              <div class="legend-swatch" style="background: #475569; border-radius: 50%;"></div>
+              <span>Idle Qubit</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-swatch" style="background: var(--accent); border-radius: 50%;"></div>
+              <span>Active Subgraph</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Waiting Queue (Next Job First) & Running Jobs -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="8" y1="6" x2="21" y2="6"></line>
+                <line x1="8" y1="12" x2="21" y2="12"></line>
+                <line x1="8" y1="18" x2="21" y2="18"></line>
+                <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                <line x1="3" y1="18" x2="3.01" y2="18"></line>
+              </svg>
+              Ready Queue (Next Job First) & Running Jobs
+            </div>
+          </div>
+
+          <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.25rem;">
+            WAITING IN QUEUE (Heap Root First):
+          </div>
+          <div class="job-list" id="waiting-list">
+            <div style="color: var(--text-muted); font-size: 0.85rem; padding: 0.5rem;">No jobs waiting in queue</div>
+          </div>
+
+          <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); margin-top: 0.5rem; margin-bottom: 0.25rem;">
+            CURRENTLY RUNNING ON QPU:
+          </div>
+          <div class="job-list" id="running-list">
+            <div style="color: var(--text-muted); font-size: 0.85rem; padding: 0.5rem;">QPU is idle</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Qubit-Time Space-Time Chart (Gantt) -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            Qubit-Time Space Allocation Chart
+          </div>
+          <div style="font-size: 0.8rem; color: var(--text-secondary);">
+            X-axis: Virtual Clock | Y-axis: Physical Qubits
+          </div>
+        </div>
+
+        <div class="gantt-container">
+          <svg id="gantt-svg" class="gantt-svg"></svg>
+        </div>
+      </div>
+
+      <!-- Finished Jobs Table & Step Decision Log -->
+      <div class="vis-grid">
+        <!-- Finished Jobs Table -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              </svg>
+              Completed Jobs (up to current time)
+            </div>
+          </div>
+          <div style="overflow-x: auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Job</th>
+                  <th>Region</th>
+                  <th>Start</th>
+                  <th>Finish</th>
+                  <th>Wait</th>
+                  <th>TAT</th>
+                  <th>SWAPs</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="completed-jobs-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Decision Log -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="4 17 10 11 4 5"></polyline>
+                <line x1="12" y1="19" x2="20" y2="19"></line>
+              </svg>
+              Discrete Event & Allocation Log
+            </div>
+          </div>
+          <div class="log-box" id="decision-log"></div>
+        </div>
+      </div>
+
+      <!-- Cross-Mode Policy Comparison Table -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="20" x2="18" y2="10"></line>
+              <line x1="12" y1="20" x2="12" y2="4"></line>
+              <line x1="6" y1="20" x2="6" y2="14"></line>
+            </svg>
+            Comprehensive Policy Comparison Matrix (All 5 Modes)
+          </div>
+          <div style="font-size: 0.75rem; color: var(--success); font-weight: 600;">
+            * Optimal values highlighted per metric
+          </div>
+        </div>
+        <div style="overflow-x: auto;">
+          <table id="comparison-table">
+            <thead>
+              <tr>
+                <th>Scheduling Mode</th>
+                <th>Avg Wait (WT)</th>
+                <th>Avg Turnaround (TAT)</th>
+                <th>Makespan</th>
+                <th>Utilization (%)</th>
+                <th>Deadline Misses</th>
+                <th>Total SWAPs</th>
+                <th>Max Wait</th>
+              </tr>
+            </thead>
+            <tbody id="comparison-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer>
+    QubitOS Simulated Quantum Job Scheduler • Designed for Data Structures & Algorithms Evaluation
+  </footer>
+
+  <script>
+    // Embedded reference results dataset for instant preview / empty state demo
+    const SAMPLE_RESULTS = {
+      "hardware": {
+        "name": "5-qubit Line Chip (illustrative values)",
+        "num_qubits": 5,
+        "n": 5,
+        "edges": [
+          [0, 1, 0.008],
+          [1, 2, 0.012],
+          [2, 3, 0.006],
+          [3, 4, 0.010]
+        ]
+      },
+      "jobs": [
+        {"id": 0, "file": "ghz4_star.qasm", "qubits": 4, "depth": 4, "arrival": 0, "priority": 2, "deadline": 20, "est": 11, "noiseCost": 0.046},
+        {"id": 1, "file": "bell.qasm", "qubits": 2, "depth": 2, "arrival": 1, "priority": 1, "deadline": 12, "est": 4, "noiseCost": 0.008},
+        {"id": 2, "file": "ghz3_star.qasm", "qubits": 3, "depth": 3, "arrival": 2, "priority": 3, "deadline": 14, "est": 7, "noiseCost": 0.028},
+        {"id": 3, "file": "ghz4_chain.qasm", "qubits": 4, "depth": 4, "arrival": 3, "priority": 2, "deadline": 25, "est": 8, "noiseCost": 0.026},
+        {"id": 4, "file": "ends5.qasm", "qubits": 5, "depth": 3, "arrival": 4, "priority": 3, "deadline": 40, "est": 11, "noiseCost": 0.068}
+      ],
+      "runs": [
+        {
+          "name": "FCFS, one job at a time",
+          "stats": {"avgWT": 13.6, "avgTAT": 21.8, "makespan": 41, "util": 0.7805, "misses": 4, "swaps": 9, "maxWait": 26},
+          "results": [
+            {"id": 0, "start": 0, "finish": 11, "wt": 0, "tat": 11, "swaps": 3, "missed": false, "region": [0,1,2,3]},
+            {"id": 1, "start": 11, "finish": 15, "wt": 10, "tat": 14, "swaps": 0, "missed": true, "region": [0,1]},
+            {"id": 2, "start": 15, "finish": 22, "wt": 13, "tat": 20, "swaps": 1, "missed": true, "region": [0,1,2]},
+            {"id": 3, "start": 22, "finish": 30, "wt": 19, "tat": 27, "swaps": 0, "missed": true, "region": [0,1,2,3]},
+            {"id": 4, "start": 30, "finish": 41, "wt": 26, "tat": 37, "swaps": 5, "missed": true, "region": [0,1,2,3,4]}
+          ],
+          "frames": [
+            {"t": 0, "log": ["Job ghz4_star.qasm arrived at t=0", "Job ghz4_star.qasm allocated on qubits [0,1,2,3] (swaps=3, runtime=11)"], "waiting": [], "running": [{"id": 0, "qubits": [0,1,2,3], "start": 0, "end": 11}], "done": []},
+            {"t": 1, "log": ["Job bell.qasm arrived at t=1"], "waiting": [1], "running": [{"id": 0, "qubits": [0,1,2,3], "start": 0, "end": 11}], "done": []},
+            {"t": 2, "log": ["Job ghz3_star.qasm arrived at t=2"], "waiting": [1, 2], "running": [{"id": 0, "qubits": [0,1,2,3], "start": 0, "end": 11}], "done": []},
+            {"t": 3, "log": ["Job ghz4_chain.qasm arrived at t=3"], "waiting": [1, 2, 3], "running": [{"id": 0, "qubits": [0,1,2,3], "start": 0, "end": 11}], "done": []},
+            {"t": 4, "log": ["Job ends5.qasm arrived at t=4"], "waiting": [1, 2, 3, 4], "running": [{"id": 0, "qubits": [0,1,2,3], "start": 0, "end": 11}], "done": []},
+            {"t": 11, "log": ["Job ghz4_star.qasm finished execution at t=11", "Job bell.qasm allocated on qubits [0,1] (swaps=0, runtime=4)"], "waiting": [2, 3, 4], "running": [{"id": 1, "qubits": [0,1], "start": 11, "end": 15}], "done": [0]},
+            {"t": 15, "log": ["Job bell.qasm finished execution at t=15", "Job ghz3_star.qasm allocated on qubits [0,1,2] (swaps=1, runtime=7)"], "waiting": [3, 4], "running": [{"id": 2, "qubits": [0,1,2], "start": 15, "end": 22}], "done": [0, 1]},
+            {"t": 22, "log": ["Job ghz3_star.qasm finished execution at t=22", "Job ghz4_chain.qasm allocated on qubits [0,1,2,3] (swaps=0, runtime=8)"], "waiting": [4], "running": [{"id": 3, "qubits": [0,1,2,3], "start": 22, "end": 30}], "done": [0, 1, 2]},
+            {"t": 30, "log": ["Job ghz4_chain.qasm finished execution at t=30", "Job ends5.qasm allocated on qubits [0,1,2,3,4] (swaps=5, runtime=11)"], "waiting": [], "running": [{"id": 4, "qubits": [0,1,2,3,4], "start": 30, "end": 41}], "done": [0, 1, 2, 3]},
+            {"t": 41, "log": ["Job ends5.qasm finished execution at t=41"], "waiting": [], "running": [], "done": [0, 1, 2, 3, 4]}
+          ]
+        },
+        {
+          "name": "FCFS + packing",
+          "stats": {"avgWT": 11.2, "avgTAT": 19.4, "makespan": 37, "util": 0.8649, "misses": 3, "swaps": 9, "maxWait": 22},
+          "results": [
+            {"id": 0, "start": 0, "finish": 11, "wt": 0, "tat": 11, "swaps": 3, "missed": false, "region": [0,1,2,3]},
+            {"id": 1, "start": 11, "finish": 15, "wt": 10, "tat": 14, "swaps": 0, "missed": true, "region": [0,1]},
+            {"id": 2, "start": 11, "finish": 18, "wt": 9, "tat": 16, "swaps": 1, "missed": true, "region": [2,3,4]},
+            {"id": 3, "start": 18, "finish": 26, "wt": 15, "tat": 23, "swaps": 0, "missed": true, "region": [0,1,2,3]},
+            {"id": 4, "start": 26, "finish": 37, "wt": 22, "tat": 33, "swaps": 5, "missed": false, "region": [0,1,2,3,4]}
+          ],
+          "frames": [
+            {"t": 0, "log": ["Job ghz4_star.qasm arrived at t=0", "Job ghz4_star.qasm allocated on qubits [0,1,2,3]"], "waiting": [], "running": [{"id": 0, "qubits": [0,1,2,3], "start": 0, "end": 11}], "done": []},
+            {"t": 1, "log": ["Job bell.qasm arrived at t=1"], "waiting": [1], "running": [{"id": 0, "qubits": [0,1,2,3], "start": 0, "end": 11}], "done": []},
+            {"t": 2, "log": ["Job ghz3_star.qasm arrived at t=2"], "waiting": [1, 2], "running": [{"id": 0, "qubits": [0,1,2,3], "start": 0, "end": 11}], "done": []},
+            {"t": 3, "log": ["Job ghz4_chain.qasm arrived at t=3"], "waiting": [1, 2, 3], "running": [{"id": 0, "qubits": [0,1,2,3], "start": 0, "end": 11}], "done": []},
+            {"t": 4, "log": ["Job ends5.qasm arrived at t=4"], "waiting": [1, 2, 3, 4], "running": [{"id": 0, "qubits": [0,1,2,3], "start": 0, "end": 11}], "done": []},
+            {"t": 11, "log": ["Job ghz4_star.qasm finished at t=11", "Job bell.qasm allocated on qubits [0,1]", "Job ghz3_star.qasm packed concurrently on qubits [2,3,4]"], "waiting": [3, 4], "running": [{"id": 1, "qubits": [0,1], "start": 11, "end": 15}, {"id": 2, "qubits": [2,3,4], "start": 11, "end": 18}], "done": [0]},
+            {"t": 15, "log": ["Job bell.qasm finished at t=15"], "waiting": [3, 4], "running": [{"id": 2, "qubits": [2,3,4], "start": 11, "end": 18}], "done": [0, 1]},
+            {"t": 18, "log": ["Job ghz3_star.qasm finished at t=18", "Job ghz4_chain.qasm allocated on qubits [0,1,2,3]"], "waiting": [4], "running": [{"id": 3, "qubits": [0,1,2,3], "start": 18, "end": 26}], "done": [0, 1, 2]},
+            {"t": 26, "log": ["Job ghz4_chain.qasm finished at t=26", "Job ends5.qasm allocated on qubits [0,1,2,3,4]"], "waiting": [], "running": [{"id": 4, "qubits": [0,1,2,3,4], "start": 26, "end": 37}], "done": [0, 1, 2, 3]},
+            {"t": 37, "log": ["Job ends5.qasm finished at t=37"], "waiting": [], "running": [], "done": [0, 1, 2, 3, 4]}
+          ]
+        },
+        {
+          "name": "Priority + packing",
+          "stats": {"avgWT": 11.8, "avgTAT": 20.0, "makespan": 37, "util": 0.8649, "misses": 3, "swaps": 9, "maxWait": 26},
+          "results": [
+            {"id": 0, "start": 0, "finish": 11, "wt": 0, "tat": 11, "swaps": 3, "missed": false, "region": [0,1,2,3]},
+            {"id": 1, "start": 11, "finish": 15, "wt": 10, "tat": 14, "swaps": 0, "missed": true, "region": [3,4]},
+            {"id": 2, "start": 11, "finish": 18, "wt": 9, "tat": 16, "swaps": 1, "missed": true, "region": [0,1,2]},
+            {"id": 3, "start": 29, "finish": 37, "wt": 26, "tat": 34, "swaps": 0, "missed": true, "region": [0,1,2,3]},
+            {"id": 4, "start": 18, "finish": 29, "wt": 14, "tat": 25, "swaps": 5, "missed": false, "region": [0,1,2,3,4]}
+          ],
+          "frames": [
+            {"t": 0, "log": ["Job ghz4_star.qasm arrived at t=0", "Job ghz4_star.qasm allocated on qubits [0,1,2,3]"], "waiting": [], "running": [{"id": 0, "qubits": [0,1,2,3], "start": 0, "end": 11}], "done": []},
+            {"t": 11, "log": ["ghz3_star (P3) allocated on [0,1,2]", "ends5 & ghz4_chain skipped (insufficient qubits)", "bell (P1) backfilled into [3,4]"], "waiting": [4, 3], "running": [{"id": 2, "qubits": [0,1,2], "start": 11, "end": 18}, {"id": 1, "qubits": [3,4], "start": 11, "end": 15}], "done": [0]},
+            {"t": 15, "log": ["bell finished on [3,4]"], "waiting": [4, 3], "running": [{"id": 2, "qubits": [0,1,2], "start": 11, "end": 18}], "done": [0, 1]},
+            {"t": 18, "log": ["ghz3_star finished", "ends5 (P3) allocated on [0,1,2,3,4]"], "waiting": [3], "running": [{"id": 4, "qubits": [0,1,2,3,4], "start": 18, "end": 29}], "done": [0, 1, 2]},
+            {"t": 29, "log": ["ends5 finished", "ghz4_chain (P2) allocated on [0,1,2,3]"], "waiting": [], "running": [{"id": 3, "qubits": [0,1,2,3], "start": 29, "end": 37}], "done": [0, 1, 2, 4]},
+            {"t": 37, "log": ["ghz4_chain finished"], "waiting": [], "running": [], "done": [0, 1, 2, 3, 4]}
+          ]
+        },
+        {
+          "name": "SJF + packing",
+          "stats": {"avgWT": 11.2, "avgTAT": 19.4, "makespan": 37, "util": 0.8649, "misses": 3, "swaps": 9, "maxWait": 22},
+          "results": [
+            {"id": 0, "start": 0, "finish": 11, "wt": 0, "tat": 11, "swaps": 3, "missed": false, "region": [0,1,2,3]},
+            {"id": 1, "start": 11, "finish": 15, "wt": 10, "tat": 14, "swaps": 0, "missed": true, "region": [0,1]},
+            {"id": 2, "start": 11, "finish": 18, "wt": 9, "tat": 16, "swaps": 1, "missed": true, "region": [2,3,4]},
+            {"id": 3, "start": 18, "finish": 26, "wt": 15, "tat": 23, "swaps": 0, "missed": true, "region": [0,1,2,3]},
+            {"id": 4, "start": 26, "finish": 37, "wt": 22, "tat": 33, "swaps": 5, "missed": false, "region": [0,1,2,3,4]}
+          ],
+          "frames": []
+        },
+        {
+          "name": "Custom + packing",
+          "stats": {"avgWT": 11.2, "avgTAT": 19.4, "makespan": 37, "util": 0.8649, "misses": 3, "swaps": 9, "maxWait": 22},
+          "results": [
+            {"id": 0, "start": 0, "finish": 11, "wt": 0, "tat": 11, "swaps": 3, "missed": false, "region": [0,1,2,3]},
+            {"id": 1, "start": 11, "finish": 15, "wt": 10, "tat": 14, "swaps": 0, "missed": true, "region": [0,1]},
+            {"id": 2, "start": 11, "finish": 18, "wt": 9, "tat": 16, "swaps": 1, "missed": true, "region": [2,3,4]},
+            {"id": 3, "start": 18, "finish": 26, "wt": 15, "tat": 23, "swaps": 0, "missed": true, "region": [0,1,2,3]},
+            {"id": 4, "start": 26, "finish": 37, "wt": 22, "tat": 33, "swaps": 5, "missed": false, "region": [0,1,2,3,4]}
+          ],
+          "frames": []
+        }
+      ]
+    };
+
+    // Global application state
+    let data = null;
+    let currentModeIndex = 0;
+    let currentFrameIndex = 0;
+    let isPlaying = false;
+    let playTimer = null;
+
+    // Distinct palette for jobs
+    const JOB_COLORS = [
+      "#38bdf8", // Sky blue
+      "#34d399", // Emerald
+      "#a855f7", // Purple
+      "#f472b6", // Pink
+      "#fb923c", // Orange
+      "#facc15", // Yellow
+      "#2dd4bf", // Teal
+      "#818cf8"  // Indigo
+    ];
+
+    function getJobColor(jobId) {
+      return JOB_COLORS[jobId % JOB_COLORS.length];
+    }
+
+    // Initialize UI
+    window.addEventListener("DOMContentLoaded", () => {
+      setupTheme();
+      setupFileInput();
+      setupPlaybackControls();
+
+      document.getElementById("load-sample-btn").addEventListener("click", () => {
+        loadData(SAMPLE_RESULTS);
+      });
+
+      // Attempt automatic load of results.json if available
+      fetch("../out/results.json")
+        .then(res => {
+          if (!res.ok) throw new Error("Status " + res.status);
+          return res.json();
+        })
+        .then(json => {
+          if (json && json.runs && json.runs.length > 0) {
+            loadData(json);
+          }
+        })
+        .catch(() => {
+          // If browser restricts local fetch on file://, wait for user file selection or demo load
+        });
+    });
+
+    function setupTheme() {
+      const toggle = document.getElementById("theme-toggle");
+      const currentTheme = localStorage.getItem("qubitos-theme") || "dark";
+      document.documentElement.setAttribute("data-theme", currentTheme);
+
+      toggle.addEventListener("click", () => {
+        const active = document.documentElement.getAttribute("data-theme");
+        const next = active === "dark" ? "light" : "dark";
+        document.documentElement.setAttribute("data-theme", next);
+        localStorage.setItem("qubitos-theme", next);
+        if (data) renderCurrentFrame();
+      });
+    }
+
+    function setupFileInput() {
+      const input = document.getElementById("file-input");
+      input.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          try {
+            const parsed = JSON.parse(event.target.result);
+            loadData(parsed);
+          } catch (err) {
+            alert("Error parsing JSON file: " + err.message);
+          }
+        };
+        reader.readAsText(file);
+      });
+    }
+
+    function setupPlaybackControls() {
+      const btnPlay = document.getElementById("btn-play");
+      const btnStepFwd = document.getElementById("btn-step-fwd");
+      const btnStepBack = document.getElementById("btn-step-back");
+      const btnReset = document.getElementById("btn-reset");
+      const slider = document.getElementById("timeline-slider");
+      const modeSelect = document.getElementById("mode-select");
+
+      btnPlay.addEventListener("click", togglePlay);
+      btnStepFwd.addEventListener("click", () => { pause(); stepForward(); });
+      btnStepBack.addEventListener("click", () => { pause(); stepBackward(); });
+      btnReset.addEventListener("click", () => { pause(); setFrame(0); });
+
+      slider.addEventListener("input", (e) => {
+        pause();
+        setFrame(parseInt(e.target.value, 10));
+      });
+
+      modeSelect.addEventListener("change", (e) => {
+        pause();
+        currentModeIndex = parseInt(e.target.value, 10);
+        initMode();
+      });
+    }
+
+    function loadData(jsonObj) {
+      data = jsonObj;
+      document.getElementById("empty-state").style.display = "none";
+      document.getElementById("dashboard").style.display = "flex";
+
+      // Populate mode selector
+      const modeSelect = document.getElementById("mode-select");
+      modeSelect.innerHTML = "";
+      data.runs.forEach((run, idx) => {
+        const opt = document.createElement("option");
+        opt.value = idx;
+        opt.textContent = run.name;
+        modeSelect.appendChild(opt);
+      });
+
+      currentModeIndex = 0;
+      renderComparisonTable();
+      initMode();
+    }
+
+    function initMode() {
+      const run = data.runs[currentModeIndex];
+      const slider = document.getElementById("timeline-slider");
+      const maxFrames = run.frames.length > 0 ? run.frames.length - 1 : 0;
+      slider.max = maxFrames;
+      slider.value = 0;
+      currentFrameIndex = 0;
+
+      // Update static metrics banner
+      document.getElementById("metric-avgwt").textContent = run.stats.avgWT.toFixed(1);
+      document.getElementById("metric-avgtat").textContent = run.stats.avgTAT.toFixed(1);
+      document.getElementById("metric-makespan").textContent = run.stats.makespan;
+      document.getElementById("metric-util").textContent = (run.stats.util * 100).toFixed(1) + "%";
+      document.getElementById("metric-misses").textContent = run.stats.misses;
+      document.getElementById("metric-swaps").textContent = run.stats.swaps;
+      document.getElementById("metric-maxwait").textContent = run.stats.maxWait;
+
+      document.getElementById("chip-name").textContent = data.hardware.name || "";
+
+      renderCurrentFrame();
+    }
+
+    function setFrame(idx) {
+      const run = data.runs[currentModeIndex];
+      if (!run.frames || run.frames.length === 0) return;
+      currentFrameIndex = Math.max(0, Math.min(idx, run.frames.length - 1));
+      document.getElementById("timeline-slider").value = currentFrameIndex;
+      renderCurrentFrame();
+    }
+
+    function stepForward() {
+      const run = data.runs[currentModeIndex];
+      if (currentFrameIndex < run.frames.length - 1) {
+        setFrame(currentFrameIndex + 1);
+      } else {
+        pause();
+      }
+    }
+
+    function stepBackward() {
+      if (currentFrameIndex > 0) {
+        setFrame(currentFrameIndex - 1);
+      }
+    }
+
+    function togglePlay() {
+      if (isPlaying) {
+        pause();
+      } else {
+        play();
+      }
+    }
+
+    function play() {
+      const run = data.runs[currentModeIndex];
+      if (currentFrameIndex >= run.frames.length - 1) {
+        setFrame(0);
+      }
+      isPlaying = true;
+      document.getElementById("play-icon").innerHTML = `
+        <rect x="6" y="4" width="4" height="16"></rect>
+        <rect x="14" y="4" width="4" height="16"></rect>
+      `;
+      const interval = parseInt(document.getElementById("speed-select").value, 10);
+      playTimer = setInterval(() => {
+        if (currentFrameIndex < run.frames.length - 1) {
+          stepForward();
+        } else {
+          pause();
+        }
+      }, interval);
+    }
+
+    function pause() {
+      isPlaying = false;
+      if (playTimer) clearInterval(playTimer);
+      document.getElementById("play-icon").innerHTML = `
+        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+      `;
+    }
+
+    function renderCurrentFrame() {
+      const run = data.runs[currentModeIndex];
+      if (!run.frames || run.frames.length === 0) {
+        document.getElementById("time-badge").textContent = "t = 0";
+        return;
+      }
+
+      const frame = run.frames[currentFrameIndex];
+      document.getElementById("time-badge").textContent = "t = " + frame.t;
+
+      renderChipGraph(frame);
+      renderQueues(frame);
+      renderGanttChart(frame.t);
+      renderCompletedTable(frame.t);
+      renderDecisionLog(run.frames, currentFrameIndex);
+    }
+
+    // 1. Render Interactive SVG Chip Graph
+    function renderChipGraph(frame) {
+      const svg = document.getElementById("chip-svg");
+      svg.innerHTML = "";
+      const numQubits = data.hardware.num_qubits || data.hardware.n || 5;
+      const edges = data.hardware.edges || [];
+
+      // Determine active qubit owners
+      const qubitOwner = {};
+      frame.running.forEach(r => {
+        r.qubits.forEach(q => {
+          qubitOwner[q] = r.id;
+        });
+      });
+
+      const width = svg.clientWidth || 500;
+      const height = 200;
+      svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+
+      // Compute horizontal linear or circular layout
+      const coords = [];
+      const padding = 50;
+      const usableWidth = width - 2 * padding;
+      const step = numQubits > 1 ? usableWidth / (numQubits - 1) : 0;
+
+      for (let i = 0; i < numQubits; ++i) {
+        coords.push({
+          x: padding + i * step,
+          y: height / 2
+        });
+      }
+
+      // Draw Edges with error-colored strokes
+      edges.forEach(e => {
+        const u = Array.isArray(e) ? e[0] : e.a;
+        const v = Array.isArray(e) ? e[1] : e.b;
+        const err = Array.isArray(e) ? e[2] : e.error;
+
+        if (u < numQubits && v < numQubits) {
+          const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+          line.setAttribute("x1", coords[u].x);
+          line.setAttribute("y1", coords[u].y);
+          line.setAttribute("x2", coords[v].x);
+          line.setAttribute("y2", coords[v].y);
+          line.setAttribute("stroke-width", "4");
+
+          // Color scale: 0.005 -> green, 0.010 -> yellow, 0.020+ -> red
+          let strokeColor = "#34d399";
+          if (err > 0.015) strokeColor = "#f87171";
+          else if (err > 0.009) strokeColor = "#fbbf24";
+          line.setAttribute("stroke", strokeColor);
+          line.setAttribute("stroke-linecap", "round");
+
+          const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
+          title.textContent = `Coupling (${u}, ${v}) | Error: ${err}`;
+          line.appendChild(title);
+
+          svg.appendChild(line);
+
+          // Add error label on edge
+          const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+          txt.setAttribute("x", (coords[u].x + coords[v].x) / 2);
+          txt.setAttribute("y", (coords[u].y + coords[v].y) / 2 - 10);
+          txt.setAttribute("fill", "var(--text-muted)");
+          txt.setAttribute("font-size", "10");
+          txt.setAttribute("font-family", "var(--font-mono)");
+          txt.setAttribute("text-anchor", "middle");
+          txt.textContent = err.toFixed(3);
+          svg.appendChild(txt);
+        }
+      });
+
+      // Draw Qubit Nodes
+      coords.forEach((pt, q) => {
+        const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+
+        const isBusy = (qubitOwner[q] !== undefined);
+        const ownerId = qubitOwner[q];
+        const fillColor = isBusy ? getJobColor(ownerId) : "var(--bg-secondary)";
+        const strokeColor = isBusy ? "#ffffff" : "var(--border-color)";
+
+        // Outer pulse circle if busy
+        if (isBusy) {
+          const pulse = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+          pulse.setAttribute("cx", pt.x);
+          pulse.setAttribute("cy", pt.y);
+          pulse.setAttribute("r", "26");
+          pulse.setAttribute("fill", fillColor);
+          pulse.setAttribute("opacity", "0.25");
+          g.appendChild(pulse);
+        }
+
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute("cx", pt.x);
+        circle.setAttribute("cy", pt.y);
+        circle.setAttribute("r", "20");
+        circle.setAttribute("fill", fillColor);
+        circle.setAttribute("stroke", strokeColor);
+        circle.setAttribute("stroke-width", "2");
+        g.appendChild(circle);
+
+        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        text.setAttribute("x", pt.x);
+        text.setAttribute("y", pt.y + 5);
+        text.setAttribute("text-anchor", "middle");
+        text.setAttribute("font-family", "var(--font-mono)");
+        text.setAttribute("font-weight", "bold");
+        text.setAttribute("font-size", "12");
+        text.setAttribute("fill", isBusy ? "#ffffff" : "var(--text-primary)");
+        text.textContent = `Q${q}`;
+        g.appendChild(text);
+
+        const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
+        if (isBusy) {
+          const job = data.jobs.find(j => j.id === ownerId);
+          title.textContent = `Qubit Q${q} | RUNNING: ${job ? job.file : 'Job #' + ownerId}`;
+        } else {
+          title.textContent = `Qubit Q${q} | IDLE`;
+        }
+        g.appendChild(title);
+
+        svg.appendChild(g);
+      });
+    }
+
+    // 2. Render Ready Queue and Running Jobs
+    function renderQueues(frame) {
+      const waitContainer = document.getElementById("waiting-list");
+      waitContainer.innerHTML = "";
+
+      if (!frame.waiting || frame.waiting.length === 0) {
+        waitContainer.innerHTML = `<div style="color: var(--text-muted); font-size: 0.85rem; padding: 0.5rem;">No jobs waiting in queue</div>`;
+      } else {
+        frame.waiting.forEach((jobId, idx) => {
+          const job = data.jobs.find(j => j.id === jobId);
+          if (!job) return;
+          const item = document.createElement("div");
+          item.className = "job-item" + (idx === 0 ? " next-job" : "");
+          item.innerHTML = `
+            <div>
+              <span style="font-weight: 600;">${idx === 0 ? "▶ NEXT: " : ""}${job.file}</span>
+              <span class="prio-pill prio-${job.priority}">P${job.priority}</span>
+            </div>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+              <span class="job-tag">${job.qubits}Q</span>
+              <span class="job-tag">est: ${job.est}u</span>
+              <span class="job-tag">dl: ${job.deadline}</span>
+            </div>
+          `;
+          waitContainer.appendChild(item);
+        });
+      }
+
+      const runContainer = document.getElementById("running-list");
+      runContainer.innerHTML = "";
+
+      if (!frame.running || frame.running.length === 0) {
+        runContainer.innerHTML = `<div style="color: var(--text-muted); font-size: 0.85rem; padding: 0.5rem;">QPU is idle</div>`;
+      } else {
+        frame.running.forEach(r => {
+          const job = data.jobs.find(j => j.id === r.id);
+          const item = document.createElement("div");
+          item.className = "job-item";
+          item.style.borderLeft = `4px solid ${getJobColor(r.id)}`;
+          item.innerHTML = `
+            <div>
+              <span style="font-weight: 600;">${job ? job.file : 'Job #' + r.id}</span>
+              <span style="font-size: 0.75rem; color: var(--text-muted); margin-left: 0.5rem;">[${r.start} → ${r.end}]</span>
+            </div>
+            <div style="display: flex; gap: 0.4rem; align-items: center;">
+              <span class="job-tag" style="background: rgba(56, 189, 248, 0.15); color: var(--accent);">
+                Qubits: [${r.qubits.join(',')}]
+              </span>
+            </div>
+          `;
+          runContainer.appendChild(item);
+        });
+      }
+    }
+
+    // 3. Render Qubit-Time Space-Time Gantt Chart
+    function renderGanttChart(currentTime) {
+      const svg = document.getElementById("gantt-svg");
+      svg.innerHTML = "";
+      const run = data.runs[currentModeIndex];
+      const numQubits = data.hardware.num_qubits || data.hardware.n || 5;
+      const makespan = Math.max(run.stats.makespan, 1);
+
+      const width = svg.clientWidth || 700;
+      const height = 180;
+      svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+
+      const leftMargin = 50;
+      const rightMargin = 20;
+      const topMargin = 20;
+      const bottomMargin = 30;
+
+      const plotW = width - leftMargin - rightMargin;
+      const plotH = height - topMargin - bottomMargin;
+      const rowH = plotH / numQubits;
+
+      // Draw Qubit Rows & Labels
+      for (let q = 0; q < numQubits; ++q) {
+        const y = topMargin + q * rowH;
+
+        // Row background alternating
+        const rowRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        rowRect.setAttribute("x", leftMargin);
+        rowRect.setAttribute("y", y);
+        rowRect.setAttribute("width", plotW);
+        rowRect.setAttribute("height", rowH);
+        rowRect.setAttribute("fill", q % 2 === 0 ? "rgba(255,255,255,0.02)" : "transparent");
+        svg.appendChild(rowRect);
+
+        // Grid horizontal line
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("x1", leftMargin);
+        line.setAttribute("y1", y + rowH);
+        line.setAttribute("x2", leftMargin + plotW);
+        line.setAttribute("y2", y + rowH);
+        line.setAttribute("stroke", "var(--border-color)");
+        line.setAttribute("stroke-width", "0.5");
+        svg.appendChild(line);
+
+        // Qubit label
+        const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        txt.setAttribute("x", leftMargin - 12);
+        txt.setAttribute("y", y + rowH / 2 + 4);
+        txt.setAttribute("text-anchor", "end");
+        txt.setAttribute("font-family", "var(--font-mono)");
+        txt.setAttribute("font-size", "11");
+        txt.setAttribute("fill", "var(--text-secondary)");
+        txt.textContent = `Q${q}`;
+        svg.appendChild(txt);
+      }
+
+      // Draw Job Allocation Blocks
+      run.results.forEach(res => {
+        if (res.start < 0 || res.finish < 0) return;
+        const job = data.jobs.find(j => j.id === res.id);
+        const color = getJobColor(res.id);
+
+        const xStart = leftMargin + (res.start / makespan) * plotW;
+        const xFinish = leftMargin + (res.finish / makespan) * plotW;
+        const blockW = Math.max(xFinish - xStart, 2);
+
+        // Opacity depends on whether job has started by currentTime
+        const isStarted = res.start <= currentTime;
+        const isFinished = res.finish <= currentTime;
+        const opacity = isFinished ? 0.9 : (isStarted ? 1.0 : 0.25);
+
+        res.region.forEach(q => {
+          const y = topMargin + q * rowH + 2;
+          const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+          rect.setAttribute("x", xStart);
+          rect.setAttribute("y", y);
+          rect.setAttribute("width", blockW);
+          rect.setAttribute("height", rowH - 4);
+          rect.setAttribute("rx", "3");
+          rect.setAttribute("fill", color);
+          rect.setAttribute("fill-opacity", opacity);
+          rect.setAttribute("stroke", isStarted && !isFinished ? "#ffffff" : color);
+          rect.setAttribute("stroke-width", isStarted && !isFinished ? "1.5" : "0.5");
+
+          const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
+          title.textContent = `${job ? job.file : 'Job ' + res.id} | [${res.start} -> ${res.finish}] on Q${q} | SWAPs: ${res.swaps}`;
+          rect.appendChild(title);
+
+          svg.appendChild(rect);
+        });
+
+        // Add text label inside block on first qubit of region
+        if (res.region.length > 0 && blockW > 35) {
+          const firstQ = res.region[0];
+          const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+          label.setAttribute("x", xStart + 4);
+          label.setAttribute("y", topMargin + firstQ * rowH + rowH / 2 + 3);
+          label.setAttribute("font-family", "var(--font-sans)");
+          label.setAttribute("font-size", "10");
+          label.setAttribute("font-weight", "bold");
+          label.setAttribute("fill", "#ffffff");
+          label.textContent = (job ? job.file.replace(".qasm", "") : `Job ${res.id}`);
+          svg.appendChild(label);
+        }
+      });
+
+      // Draw Timeline Playhead Vertical Bar
+      const playheadX = leftMargin + (currentTime / makespan) * plotW;
+      const playhead = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      playhead.setAttribute("x1", playheadX);
+      playhead.setAttribute("y1", topMargin - 5);
+      playhead.setAttribute("x2", playheadX);
+      playhead.setAttribute("y2", topMargin + plotH + 5);
+      playhead.setAttribute("stroke", "var(--accent)");
+      playhead.setAttribute("stroke-width", "2");
+      playhead.setAttribute("stroke-dasharray", "4,2");
+      svg.appendChild(playhead);
+
+      // Time axis ticks
+      const numTicks = 6;
+      for (let i = 0; i <= numTicks; ++i) {
+        const tVal = Math.round((i / numTicks) * makespan);
+        const x = leftMargin + (tVal / makespan) * plotW;
+
+        const tickTxt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        tickTxt.setAttribute("x", x);
+        tickTxt.setAttribute("y", topMargin + plotH + 18);
+        tickTxt.setAttribute("text-anchor", "middle");
+        tickTxt.setAttribute("font-family", "var(--font-mono)");
+        tickTxt.setAttribute("font-size", "10");
+        tickTxt.setAttribute("fill", "var(--text-muted)");
+        tickTxt.textContent = `t=${tVal}`;
+        svg.appendChild(tickTxt);
+      }
+    }
+
+    // 4. Render Completed Jobs Table
+    function renderCompletedTable(currentTime) {
+      const tbody = document.getElementById("completed-jobs-body");
+      tbody.innerHTML = "";
+      const run = data.runs[currentModeIndex];
+
+      const completed = run.results.filter(r => r.finish >= 0 && r.finish <= currentTime);
+      if (completed.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--text-muted); padding:1rem;">No jobs completed yet at virtual time t=${currentTime}</td></tr>`;
+        return;
+      }
+
+      completed.forEach(res => {
+        const job = data.jobs.find(j => j.id === res.id);
+        const tr = document.createElement("tr");
+        const statusBadge = res.missed ? 
+          `<span class="badge badge-danger">Missed (${res.finish} > ${job ? job.deadline : '?'})</span>` : 
+          `<span class="badge badge-success">Met Deadline</span>`;
+
+        tr.innerHTML = `
+          <td style="font-weight:600;"><span style="color:${getJobColor(res.id)}">●</span> ${job ? job.file : 'Job #' + res.id}</td>
+          <td><code>[${res.region.join(',')}]</code></td>
+          <td>${res.start}</td>
+          <td>${res.finish}</td>
+          <td>${res.wt}</td>
+          <td>${res.tat}</td>
+          <td>${res.swaps}</td>
+          <td>${statusBadge}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // 5. Render Decision Log
+    function renderDecisionLog(frames, activeIdx) {
+      const logBox = document.getElementById("decision-log");
+      logBox.innerHTML = "";
+
+      for (let i = 0; i <= activeIdx; ++i) {
+        const frame = frames[i];
+        if (frame.log && frame.log.length > 0) {
+          frame.log.forEach(entry => {
+            const div = document.createElement("div");
+            div.className = "log-entry" + (i === activeIdx ? " active-step" : "");
+            div.textContent = `[t=${frame.t}] ${entry}`;
+            logBox.appendChild(div);
+          });
+        }
+      }
+      logBox.scrollTop = logBox.scrollHeight;
+    }
+
+    // 6. Render Cross-Mode Comparison Table
+    function renderComparisonTable() {
+      const tbody = document.getElementById("comparison-body");
+      tbody.innerHTML = "";
+
+      // Find best values for highlighting
+      let bestWT = Infinity, bestTAT = Infinity, bestMakespan = Infinity;
+      let bestUtil = -Infinity, bestMisses = Infinity, bestSwaps = Infinity, bestMaxWait = Infinity;
+
+      data.runs.forEach(r => {
+        if (r.stats.avgWT < bestWT) bestWT = r.stats.avgWT;
+        if (r.stats.avgTAT < bestTAT) bestTAT = r.stats.avgTAT;
+        if (r.stats.makespan < bestMakespan) bestMakespan = r.stats.makespan;
+        if (r.stats.util > bestUtil) bestUtil = r.stats.util;
+        if (r.stats.misses < bestMisses) bestMisses = r.stats.misses;
+        if (r.stats.swaps < bestSwaps) bestSwaps = r.stats.swaps;
+        if (r.stats.maxWait < bestMaxWait) bestMaxWait = r.stats.maxWait;
+      });
+
+      data.runs.forEach((r, idx) => {
+        const tr = document.createElement("tr");
+        if (idx === currentModeIndex) {
+          tr.style.backgroundColor = "var(--bg-card-hover)";
+        }
+
+        const isBestWT = Math.abs(r.stats.avgWT - bestWT) < 1e-4;
+        const isBestTAT = Math.abs(r.stats.avgTAT - bestTAT) < 1e-4;
+        const isBestMakespan = r.stats.makespan === bestMakespan;
+        const isBestUtil = Math.abs(r.stats.util - bestUtil) < 1e-4;
+        const isBestMisses = r.stats.misses === bestMisses;
+        const isBestSwaps = r.stats.swaps === bestSwaps;
+        const isBestMaxWait = r.stats.maxWait === bestMaxWait;
+
+        tr.innerHTML = `
+          <td style="font-weight: 600;">${r.name}</td>
+          <td class="${isBestWT ? 'winner-cell' : ''}">${r.stats.avgWT.toFixed(1)}${isBestWT ? ' ★' : ''}</td>
+          <td class="${isBestTAT ? 'winner-cell' : ''}">${r.stats.avgTAT.toFixed(1)}${isBestTAT ? ' ★' : ''}</td>
+          <td class="${isBestMakespan ? 'winner-cell' : ''}">${r.stats.makespan}${isBestMakespan ? ' ★' : ''}</td>
+          <td class="${isBestUtil ? 'winner-cell' : ''}">${(r.stats.util * 100).toFixed(1)}%${isBestUtil ? ' ★' : ''}</td>
+          <td class="${isBestMisses ? 'winner-cell' : ''}">${r.stats.misses}${isBestMisses ? ' ★' : ''}</td>
+          <td class="${isBestSwaps ? 'winner-cell' : ''}">${r.stats.swaps}${isBestSwaps ? ' ★' : ''}</td>
+          <td class="${isBestMaxWait ? 'winner-cell' : ''}">${r.stats.maxWait}${isBestMaxWait ? ' ★' : ''}</td>
+        `;
+
+        tbody.appendChild(tr);
+      });
+    }
+  </script>
+</body>
+</html>
+

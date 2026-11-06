@@ -1,0 +1,11 @@
+# Binaries
+qubitos
+test_units
+test_acceptance
+
+# Build artifacts & symbols
+*.o
+*.dSYM/
+
+# OS metadata
+.DS_Store

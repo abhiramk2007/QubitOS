@@ -1,0 +1,7 @@
+file,arrival,priority,deadline
+ghz4_star.qasm,0,2,20
+bell.qasm,1,1,12
+ghz3_star.qasm,2,3,14
+ghz4_chain.qasm,3,2,25
+ends5.qasm,4,3,40
+

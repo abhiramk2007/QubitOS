@@ -1,0 +1,1789 @@
+{
+  "hardware": {
+    "edges": [
+      [
+        0,
+        1,
+        0.008
+      ],
+      [
+        1,
+        2,
+        0.012
+      ],
+      [
+        2,
+        3,
+        0.006
+      ],
+      [
+        3,
+        4,
+        0.01
+      ]
+    ],
+    "n": 5,
+    "name": "5-qubit Line Chip (illustrative values)",
+    "num_qubits": 5
+  },
+  "jobs": [
+    {
+      "arrival": 0,
+      "deadline": 20,
+      "depth": 4,
+      "est": 11,
+      "file": "ghz4_star.qasm",
+      "id": 0,
+      "noiseCost": 0.054,
+      "priority": 2,
+      "qubits": 4
+    },
+    {
+      "arrival": 1,
+      "deadline": 12,
+      "depth": 2,
+      "est": 4,
+      "file": "bell.qasm",
+      "id": 1,
+      "noiseCost": 0.008,
+      "priority": 1,
+      "qubits": 2
+    },
+    {
+      "arrival": 2,
+      "deadline": 14,
+      "depth": 3,
+      "est": 7,
+      "file": "ghz3_star.qasm",
+      "id": 2,
+      "noiseCost": 0.028,
+      "priority": 3,
+      "qubits": 3
+    },
+    {
+      "arrival": 3,
+      "deadline": 25,
+      "depth": 4,
+      "est": 8,
+      "file": "ghz4_chain.qasm",
+      "id": 3,
+      "noiseCost": 0.026,
+      "priority": 2,
+      "qubits": 4
+    },
+    {
+      "arrival": 4,
+      "deadline": 40,
+      "depth": 3,
+      "est": 11,
+      "file": "ends5.qasm",
+      "id": 4,
+      "noiseCost": 0.07,
+      "priority": 3,
+      "qubits": 5
+    }
+  ],
+  "runs": [
+    {
+      "frames": [
+        {
+          "done": [],
+          "log": [
+            "Job ghz4_star.qasm arrived at virtual clock t=0",
+            "Job ghz4_star.qasm allocated on qubits [0,1,2,3] (swaps=3, runtime=11)"
+          ],
+          "running": [
+            {
+              "end": 11,
+              "id": 0,
+              "qubits": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "start": 0
+            }
+          ],
+          "t": 0,
+          "waiting": []
+        },
+        {
+          "done": [],
+          "log": [
+            "Job bell.qasm arrived at virtual clock t=1"
+          ],
+          "running": [
+            {
+              "end": 11,
+              "id": 0,
+              "qubits": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "start": 0
+            }
+          ],
+          "t": 1,
+          "waiting": [
+            1
+          ]
+        },
+        {
+          "done": [],
+          "log": [
+            "Job ghz3_star.qasm arrived at virtual clock t=2"
+          ],
+          "running": [
+            {
+              "end": 11,
+              "id": 0,
+              "qubits": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "start": 0
+            }
+          ],
+          "t": 2,
+          "waiting": [
+            1,
+            2
+          ]
+        },
+        {
+          "done": [],
+          "log": [
+            "Job ghz4_chain.qasm arrived at virtual clock t=3"
+          ],
+          "running": [
+            {
+              "end": 11,
+              "id": 0,
+              "qubits": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "start": 0
+            }
+          ],
+          "t": 3,
+          "waiting": [
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "done": [],
+          "log": [
+            "Job ends5.qasm arrived at virtual clock t=4"
+          ],
+          "running": [
+            {
+              "end": 11,
+              "id": 0,
+              "qubits": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "start": 0
+            }
+          ],
+          "t": 4,
+          "waiting": [
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "done": [
+            0
+          ],
+          "log": [
+            "Job ghz4_star.qasm finished execution at virtual clock t=11",
+            "Job bell.qasm allocated on qubits [0,1] (swaps=0, runtime=4)"
+          ],
+          "running": [
+            {
+              "end": 15,
+              "id": 1,
+              "qubits": [
+                0,
+                1
+              ],
+              "start": 11
+            }
+          ],
+          "t": 11,
+          "waiting": [
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "done": [
+            0,
+            1
+          ],
+          "log": [
+            "Job bell.qasm finished execution at virtual clock t=15",
+            "Job ghz3_star.qasm allocated on qubits [0,1,2] (swaps=1, runtime=7)"
+          ],
+          "running": [
+            {
+              "end": 22,
+              "id": 2,
+              "qubits": [
+                0,
+                1,
+                2
+              ],
+              "start": 15
+            }
+          ],
+          "t": 15,
+          "waiting": [
+            3,
+            4
+          ]
+        },
+        {
+          "done": [
+            0,
+            1,
+            2
+          ],
+          "log": [
+            "Job ghz3_star.qasm finished execution at virtual clock t=22",
+            "Job ghz4_chain.qasm allocated on qubits [0,1,2,3] (swaps=0, runtime=8)"
+          ],
+          "running": [
+            {
+              "end": 30,
+              "id": 3,
+              "qubits": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "start": 22
+            }
+          ],
+          "t": 22,
+          "waiting": [
+            4
+          ]
+        },
+        {
+          "done": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "log": [
+            "Job ghz4_chain.qasm finished execution at virtual clock t=30",
+            "Job ends5.qasm allocated on qubits [0,1,2,3,4] (swaps=5, runtime=11)"
+          ],
+          "running": [
+            {
+              "end": 41,
+              "id": 4,
+              "qubits": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ],
+              "start": 30
+            }
+          ],
+          "t": 30,
+          "waiting": []
+        },
+        {
+          "done": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "log": [
+            "Job ends5.qasm finished execution at virtual clock t=41"
+          ],
+          "running": [],
+          "t": 41,
+          "waiting": []
+        }
+      ],
+      "name": "FCFS, one job at a time",
+      "results": [
+        {
+          "finish": 11,
+          "id": 0,
+          "missed": false,
+          "region": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "start": 0,
+          "swaps": 3,
+          "tat": 11,
+          "wt": 0
+        },
+        {
+          "finish": 15,
+          "id": 1,
+          "missed": true,
+          "region": [
+            0,
+            1
+          ],
+          "start": 11,
+          "swaps": 0,
+          "tat": 14,
+          "wt": 10
+        },
+        {
+          "finish": 22,
+          "id": 2,
+          "missed": true,
+          "region": [
+            0,
+            1,
+            2
+          ],
+          "start": 15,
+          "swaps": 1,
+          "tat": 20,
+          "wt": 13
+        },
+        {
+          "finish": 30,
+          "id": 3,
+          "missed": true,
+          "region": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "start": 22,
+          "swaps": 0,
+          "tat": 27,
+          "wt": 19
+        },
+        {
+          "finish": 41,
+          "id": 4,
+          "missed": true,
+          "region": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "start": 30,
+          "swaps": 5,
+          "tat": 37,
+          "wt": 26
+        }
+      ],
+      "stats": {
+        "avgTAT": 21.8,
+        "avgWT": 13.6,
+        "makespan": 41,
+        "maxWait": 26,
+        "misses": 4,
+        "swaps": 9,
+        "util": 0.7804878049
+      }
+    },
+    {
+      "frames": [
+        {
+          "done": [],
+          "log": [
+            "Job ghz4_star.qasm arrived at virtual clock t=0",
+            "Job ghz4_star.qasm allocated on qubits [0,1,2,3] (swaps=3, runtime=11)"
+          ],
+          "running": [
+            {
+              "end": 11,
+              "id": 0,
+              "qubits": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "start": 0
+            }
+          ],
+          "t": 0,
+          "waiting": []
+        },
+        {
+          "done": [],
+          "log": [
+            "Job bell.qasm arrived at virtual clock t=1"
+          ],
+          "running": [
+            {
+              "end": 11,
+              "id": 0,
+              "qubits": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "start": 0
+            }
+          ],
+          "t": 1,
+          "waiting": [
+            1
+          ]
+        },
+        {
+          "done": [],
+          "log": [
+            "Job ghz3_star.qasm arrived at virtual clock t=2"
+          ],
+          "running": [
+            {
+              "end": 11,
+              "id": 0,
+              "qubits": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "start": 0
+            }
+          ],
+          "t": 2,
+          "waiting": [
+            1,
+            2
+          ]
+        },
+        {
+          "done": [],
+          "log": [
+            "Job ghz4_chain.qasm arrived at virtual clock t=3"
+          ],
+          "running": [
+            {
+              "end": 11,
+              "id": 0,
+              "qubits": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "start": 0
+            }
+          ],
+          "t": 3,
+          "waiting": [
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "done": [],
+          "log": [
+            "Job ends5.qasm arrived at virtual clock t=4"
+          ],
+          "running": [
+            {
+              "end": 11,
+              "id": 0,
+              "qubits": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "start": 0
+            }
+          ],
+          "t": 4,
+          "waiting": [
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "done": [
+            0
+          ],
+          "log": [
+            "Job ghz4_star.qasm finished execution at virtual clock t=11",
+            "Job bell.qasm allocated on qubits [0,1] (swaps=0, runtime=4)",
+            "Job ghz3_star.qasm allocated on qubits [2,3,4] (swaps=1, runtime=7)"
+          ],
+          "running": [
+            {
+              "end": 15,
+              "id": 1,
+              "qubits": [
+                0,
+                1
+              ],
+              "start": 11
+            },
+            {
+              "end": 18,
+              "id": 2,
+              "qubits": [
+                2,
+                3,
+                4
+              ],
+              "start": 11
+            }
+          ],
+          "t": 11,
+          "waiting": [
+            3,
+            4
+          ]
+        },
+        {
+          "done": [
+            0,
+            1
+          ],
+          "log": [
+            "Job bell.qasm finished execution at virtual clock t=15"
+          ],
+          "running": [
+            {
+              "end": 18,
+              "id": 2,
+              "qubits": [
+                2,
+                3,
+                4
+              ],
+              "start": 11
+            }
+          ],
+          "t": 15,
+          "waiting": [
+            3,
+            4
+          ]
+        },
+        {
+          "done": [
+            0,
+            1,
+            2
+          ],
+          "log": [
+            "Job ghz3_star.qasm finished execution at virtual clock t=18",
+            "Job ghz4_chain.qasm allocated on qubits [0,1,2,3] (swaps=0, runtime=8)"
+          ],
+          "running": [
+            {
+              "end": 26,
+              "id": 3,
+              "qubits": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "start": 18
+            }
+          ],
+          "t": 18,
+          "waiting": [
+            4
+          ]
+        },
+        {
+          "done": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "log": [
+            "Job ghz4_chain.qasm finished execution at virtual clock t=26",
+            "Job ends5.qasm allocated on qubits [0,1,2,3,4] (swaps=5, runtime=11)"
+          ],
+          "running": [
+            {
+              "end": 37,
+              "id": 4,
+              "qubits": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ],
+              "start": 26
+            }
+          ],
+          "t": 26,
+          "waiting": []
+        },
+        {
+          "done": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "log": [
+            "Job ends5.qasm finished execution at virtual clock t=37"
+          ],
+          "running": [],
+          "t": 37,
+          "waiting": []
+        }
+      ],
+      "name": "FCFS + packing",
+      "results": [
+        {
+          "finish": 11,
+          "id": 0,
+          "missed": false,
+          "region": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "start": 0,
+          "swaps": 3,
+          "tat": 11,
+          "wt": 0
+        },
+        {
+          "finish": 15,
+          "id": 1,
+          "missed": true,
+          "region": [
+            0,
+            1
+          ],
+          "start": 11,
+          "swaps": 0,
+          "tat": 14,
+          "wt": 10
+        },
+        {
+          "finish": 18,
+          "id": 2,
+          "missed": true,
+          "region": [
+            2,
+            3,
+            4
+          ],
+          "start": 11,
+          "swaps": 1,
+          "tat": 16,
+          "wt": 9
+        },
+        {
+          "finish": 26,
+          "id": 3,
+          "missed": true,
+          "region": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "start": 18,
+          "swaps": 0,
+          "tat": 23,
+          "wt": 15
+        },
+        {
+          "finish": 37,
+          "id": 4,
+          "missed": false,
+          "region": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "start": 26,
+          "swaps": 5,
+          "tat": 33,
+          "wt": 22
+        }
+      ],
+      "stats": {
+        "avgTAT": 19.4,
+        "avgWT": 11.2,
+        "makespan": 37,
+        "maxWait": 22,
+        "misses": 3,
+        "swaps": 9,
+        "util": 0.8648648649
+      }
+    },
+    {
+      "frames": [
+        {
+          "done": [],
+          "log": [
+            "Job ghz4_star.qasm arrived at virtual clock t=0",
+            "Job ghz4_star.qasm allocated on qubits [0,1,2,3] (swaps=3, runtime=11)"
+          ],
+          "running": [
+            {
+              "end": 11,
+              "id": 0,
+              "qubits": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "start": 0
+            }
+          ],
+          "t": 0,
+          "waiting": []
+        },
+        {
+          "done": [],
+          "log": [
+            "Job bell.qasm arrived at virtual clock t=1"
+          ],
+          "running": [
+            {
+              "end": 11,
+              "id": 0,
+              "qubits": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "start": 0
+            }
+          ],
+          "t": 1,
+          "waiting": [
+            1
+          ]
+        },
+        {
+          "done": [],
+          "log": [
+            "Job ghz3_star.qasm arrived at virtual clock t=2"
+          ],
+          "running": [
+            {
+              "end": 11,
+              "id": 0,
+              "qubits": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "start": 0
+            }
+          ],
+          "t": 2,
+          "waiting": [
+            2,
+            1
+          ]
+        },
+        {
+          "done": [],
+          "log": [
+            "Job ghz4_chain.qasm arrived at virtual clock t=3"
+          ],
+          "running": [
+            {
+              "end": 11,
+              "id": 0,
+              "qubits": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "start": 0
+            }
+          ],
+          "t": 3,
+          "waiting": [
+            2,
+            3,
+            1
+          ]
+        },
+        {
+          "done": [],
+          "log": [
+            "Job ends5.qasm arrived at virtual clock t=4"
+          ],
+          "running": [
+            {
+              "end": 11,
+              "id": 0,
+              "qubits": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "start": 0
+            }
+          ],
+          "t": 4,
+          "waiting": [
+            2,
+            4,
+            3,
+            1
+          ]
+        },
+        {
+          "done": [
+            0
+          ],
+          "log": [
+            "Job ghz4_star.qasm finished execution at virtual clock t=11",
+            "Job ghz3_star.qasm allocated on qubits [0,1,2] (swaps=1, runtime=7)",
+            "Job bell.qasm allocated on qubits [3,4] (swaps=0, runtime=4)"
+          ],
+          "running": [
+            {
+              "end": 18,
+              "id": 2,
+              "qubits": [
+                0,
+                1,
+                2
+              ],
+              "start": 11
+            },
+            {
+              "end": 15,
+              "id": 1,
+              "qubits": [
+                3,
+                4
+              ],
+              "start": 11
+            }
+          ],
+          "t": 11,
+          "waiting": [
+            4,
+            3
+          ]
+        },
+        {
+          "done": [
+            0,
+            1
+          ],
+          "log": [
+            "Job bell.qasm finished execution at virtual clock t=15"
+          ],
+          "running": [
+            {
+              "end": 18,
+              "id": 2,
+              "qubits": [
+                0,
+                1,
+                2
+              ],
+              "start": 11
+            }
+          ],
+          "t": 15,
+          "waiting": [
+            4,
+            3
+          ]
+        },
+        {
+          "done": [
+            0,
+            1,
+            2
+          ],
+          "log": [
+            "Job ghz3_star.qasm finished execution at virtual clock t=18",
+            "Job ends5.qasm allocated on qubits [0,1,2,3,4] (swaps=5, runtime=11)"
+          ],
+          "running": [
+            {
+              "end": 29,
+              "id": 4,
+              "qubits": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ],
+              "start": 18
+            }
+          ],
+          "t": 18,
+          "waiting": [
+            3
+          ]
+        },
+        {
+          "done": [
+            0,
+            1,
+            2,
+            4
+          ],
+          "log": [
+            "Job ends5.qasm finished execution at virtual clock t=29",
+            "Job ghz4_chain.qasm allocated on qubits [0,1,2,3] (swaps=0, runtime=8)"
+          ],
+          "running": [
+            {
+              "end": 37,
+              "id": 3,
+              "qubits": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "start": 29
+            }
+          ],
+          "t": 29,
+          "waiting": []
+        },
+        {
+          "done": [
+            0,
+            1,
+            2,
+            4,
+            3
+          ],
+          "log": [
+            "Job ghz4_chain.qasm finished execution at virtual clock t=37"
+          ],
+          "running": [],
+          "t": 37,
+          "waiting": []
+        }
+      ],
+      "name": "Priority + packing",
+      "results": [
+        {
+          "finish": 11,
+          "id": 0,
+          "missed": false,
+          "region": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "start": 0,
+          "swaps": 3,
+          "tat": 11,
+          "wt": 0
+        },
+        {
+          "finish": 15,
+          "id": 1,
+          "missed": true,
+          "region": [
+            3,
+            4
+          ],
+          "start": 11,
+          "swaps": 0,
+          "tat": 14,
+          "wt": 10
+        },
+        {
+          "finish": 18,
+          "id": 2,
+          "missed": true,
+          "region": [
+            0,
+            1,
+            2
+          ],
+          "start": 11,
+          "swaps": 1,
+          "tat": 16,
+          "wt": 9
+        },
+        {
+          "finish": 37,
+          "id": 3,
+          "missed": true,
+          "region": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "start": 29,
+          "swaps": 0,
+          "tat": 34,
+          "wt": 26
+        },
+        {
+          "finish": 29,
+          "id": 4,
+          "missed": false,
+          "region": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "start": 18,
+          "swaps": 5,
+          "tat": 25,
+          "wt": 14
+        }
+      ],
+      "stats": {
+        "avgTAT": 20,
+        "avgWT": 11.8,
+        "makespan": 37,
+        "maxWait": 26,
+        "misses": 3,
+        "swaps": 9,
+        "util": 0.8648648649
+      }
+    },
+    {
+      "frames": [
+        {
+          "done": [],
+          "log": [
+            "Job ghz4_star.qasm arrived at virtual clock t=0",
+            "Job ghz4_star.qasm allocated on qubits [0,1,2,3] (swaps=3, runtime=11)"
+          ],
+          "running": [
+            {
+              "end": 11,
+              "id": 0,
+              "qubits": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "start": 0
+            }
+          ],
+          "t": 0,
+          "waiting": []
+        },
+        {
+          "done": [],
+          "log": [
+            "Job bell.qasm arrived at virtual clock t=1"
+          ],
+          "running": [
+            {
+              "end": 11,
+              "id": 0,
+              "qubits": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "start": 0
+            }
+          ],
+          "t": 1,
+          "waiting": [
+            1
+          ]
+        },
+        {
+          "done": [],
+          "log": [
+            "Job ghz3_star.qasm arrived at virtual clock t=2"
+          ],
+          "running": [
+            {
+              "end": 11,
+              "id": 0,
+              "qubits": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "start": 0
+            }
+          ],
+          "t": 2,
+          "waiting": [
+            1,
+            2
+          ]
+        },
+        {
+          "done": [],
+          "log": [
+            "Job ghz4_chain.qasm arrived at virtual clock t=3"
+          ],
+          "running": [
+            {
+              "end": 11,
+              "id": 0,
+              "qubits": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "start": 0
+            }
+          ],
+          "t": 3,
+          "waiting": [
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "done": [],
+          "log": [
+            "Job ends5.qasm arrived at virtual clock t=4"
+          ],
+          "running": [
+            {
+              "end": 11,
+              "id": 0,
+              "qubits": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "start": 0
+            }
+          ],
+          "t": 4,
+          "waiting": [
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "done": [
+            0
+          ],
+          "log": [
+            "Job ghz4_star.qasm finished execution at virtual clock t=11",
+            "Job bell.qasm allocated on qubits [0,1] (swaps=0, runtime=4)",
+            "Job ghz3_star.qasm allocated on qubits [2,3,4] (swaps=1, runtime=7)"
+          ],
+          "running": [
+            {
+              "end": 15,
+              "id": 1,
+              "qubits": [
+                0,
+                1
+              ],
+              "start": 11
+            },
+            {
+              "end": 18,
+              "id": 2,
+              "qubits": [
+                2,
+                3,
+                4
+              ],
+              "start": 11
+            }
+          ],
+          "t": 11,
+          "waiting": [
+            3,
+            4
+          ]
+        },
+        {
+          "done": [
+            0,
+            1
+          ],
+          "log": [
+            "Job bell.qasm finished execution at virtual clock t=15"
+          ],
+          "running": [
+            {
+              "end": 18,
+              "id": 2,
+              "qubits": [
+                2,
+                3,
+                4
+              ],
+              "start": 11
+            }
+          ],
+          "t": 15,
+          "waiting": [
+            3,
+            4
+          ]
+        },
+        {
+          "done": [
+            0,
+            1,
+            2
+          ],
+          "log": [
+            "Job ghz3_star.qasm finished execution at virtual clock t=18",
+            "Job ghz4_chain.qasm allocated on qubits [0,1,2,3] (swaps=0, runtime=8)"
+          ],
+          "running": [
+            {
+              "end": 26,
+              "id": 3,
+              "qubits": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "start": 18
+            }
+          ],
+          "t": 18,
+          "waiting": [
+            4
+          ]
+        },
+        {
+          "done": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "log": [
+            "Job ghz4_chain.qasm finished execution at virtual clock t=26",
+            "Job ends5.qasm allocated on qubits [0,1,2,3,4] (swaps=5, runtime=11)"
+          ],
+          "running": [
+            {
+              "end": 37,
+              "id": 4,
+              "qubits": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ],
+              "start": 26
+            }
+          ],
+          "t": 26,
+          "waiting": []
+        },
+        {
+          "done": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "log": [
+            "Job ends5.qasm finished execution at virtual clock t=37"
+          ],
+          "running": [],
+          "t": 37,
+          "waiting": []
+        }
+      ],
+      "name": "SJF + packing",
+      "results": [
+        {
+          "finish": 11,
+          "id": 0,
+          "missed": false,
+          "region": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "start": 0,
+          "swaps": 3,
+          "tat": 11,
+          "wt": 0
+        },
+        {
+          "finish": 15,
+          "id": 1,
+          "missed": true,
+          "region": [
+            0,
+            1
+          ],
+          "start": 11,
+          "swaps": 0,
+          "tat": 14,
+          "wt": 10
+        },
+        {
+          "finish": 18,
+          "id": 2,
+          "missed": true,
+          "region": [
+            2,
+            3,
+            4
+          ],
+          "start": 11,
+          "swaps": 1,
+          "tat": 16,
+          "wt": 9
+        },
+        {
+          "finish": 26,
+          "id": 3,
+          "missed": true,
+          "region": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "start": 18,
+          "swaps": 0,
+          "tat": 23,
+          "wt": 15
+        },
+        {
+          "finish": 37,
+          "id": 4,
+          "missed": false,
+          "region": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "start": 26,
+          "swaps": 5,
+          "tat": 33,
+          "wt": 22
+        }
+      ],
+      "stats": {
+        "avgTAT": 19.4,
+        "avgWT": 11.2,
+        "makespan": 37,
+        "maxWait": 22,
+        "misses": 3,
+        "swaps": 9,
+        "util": 0.8648648649
+      }
+    },
+    {
+      "frames": [
+        {
+          "done": [],
+          "log": [
+            "Job ghz4_star.qasm arrived at virtual clock t=0",
+            "Job ghz4_star.qasm allocated on qubits [0,1,2,3] (swaps=3, runtime=11)"
+          ],
+          "running": [
+            {
+              "end": 11,
+              "id": 0,
+              "qubits": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "start": 0
+            }
+          ],
+          "t": 0,
+          "waiting": []
+        },
+        {
+          "done": [],
+          "log": [
+            "Job bell.qasm arrived at virtual clock t=1"
+          ],
+          "running": [
+            {
+              "end": 11,
+              "id": 0,
+              "qubits": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "start": 0
+            }
+          ],
+          "t": 1,
+          "waiting": [
+            1
+          ]
+        },
+        {
+          "done": [],
+          "log": [
+            "Job ghz3_star.qasm arrived at virtual clock t=2"
+          ],
+          "running": [
+            {
+              "end": 11,
+              "id": 0,
+              "qubits": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "start": 0
+            }
+          ],
+          "t": 2,
+          "waiting": [
+            2,
+            1
+          ]
+        },
+        {
+          "done": [],
+          "log": [
+            "Job ghz4_chain.qasm arrived at virtual clock t=3"
+          ],
+          "running": [
+            {
+              "end": 11,
+              "id": 0,
+              "qubits": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "start": 0
+            }
+          ],
+          "t": 3,
+          "waiting": [
+            2,
+            1,
+            3
+          ]
+        },
+        {
+          "done": [],
+          "log": [
+            "Job ends5.qasm arrived at virtual clock t=4"
+          ],
+          "running": [
+            {
+              "end": 11,
+              "id": 0,
+              "qubits": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "start": 0
+            }
+          ],
+          "t": 4,
+          "waiting": [
+            2,
+            1,
+            3,
+            4
+          ]
+        },
+        {
+          "done": [
+            0
+          ],
+          "log": [
+            "Job ghz4_star.qasm finished execution at virtual clock t=11",
+            "Job ghz3_star.qasm allocated on qubits [0,1,2] (swaps=1, runtime=7)",
+            "Job bell.qasm allocated on qubits [3,4] (swaps=0, runtime=4)"
+          ],
+          "running": [
+            {
+              "end": 18,
+              "id": 2,
+              "qubits": [
+                0,
+                1,
+                2
+              ],
+              "start": 11
+            },
+            {
+              "end": 15,
+              "id": 1,
+              "qubits": [
+                3,
+                4
+              ],
+              "start": 11
+            }
+          ],
+          "t": 11,
+          "waiting": [
+            3,
+            4
+          ]
+        },
+        {
+          "done": [
+            0,
+            1
+          ],
+          "log": [
+            "Job bell.qasm finished execution at virtual clock t=15"
+          ],
+          "running": [
+            {
+              "end": 18,
+              "id": 2,
+              "qubits": [
+                0,
+                1,
+                2
+              ],
+              "start": 11
+            }
+          ],
+          "t": 15,
+          "waiting": [
+            3,
+            4
+          ]
+        },
+        {
+          "done": [
+            0,
+            1,
+            2
+          ],
+          "log": [
+            "Job ghz3_star.qasm finished execution at virtual clock t=18",
+            "Job ghz4_chain.qasm allocated on qubits [0,1,2,3] (swaps=0, runtime=8)"
+          ],
+          "running": [
+            {
+              "end": 26,
+              "id": 3,
+              "qubits": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "start": 18
+            }
+          ],
+          "t": 18,
+          "waiting": [
+            4
+          ]
+        },
+        {
+          "done": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "log": [
+            "Job ghz4_chain.qasm finished execution at virtual clock t=26",
+            "Job ends5.qasm allocated on qubits [0,1,2,3,4] (swaps=5, runtime=11)"
+          ],
+          "running": [
+            {
+              "end": 37,
+              "id": 4,
+              "qubits": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ],
+              "start": 26
+            }
+          ],
+          "t": 26,
+          "waiting": []
+        },
+        {
+          "done": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "log": [
+            "Job ends5.qasm finished execution at virtual clock t=37"
+          ],
+          "running": [],
+          "t": 37,
+          "waiting": []
+        }
+      ],
+      "name": "Custom + packing",
+      "results": [
+        {
+          "finish": 11,
+          "id": 0,
+          "missed": false,
+          "region": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "start": 0,
+          "swaps": 3,
+          "tat": 11,
+          "wt": 0
+        },
+        {
+          "finish": 15,
+          "id": 1,
+          "missed": true,
+          "region": [
+            3,
+            4
+          ],
+          "start": 11,
+          "swaps": 0,
+          "tat": 14,
+          "wt": 10
+        },
+        {
+          "finish": 18,
+          "id": 2,
+          "missed": true,
+          "region": [
+            0,
+            1,
+            2
+          ],
+          "start": 11,
+          "swaps": 1,
+          "tat": 16,
+          "wt": 9
+        },
+        {
+          "finish": 26,
+          "id": 3,
+          "missed": true,
+          "region": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "start": 18,
+          "swaps": 0,
+          "tat": 23,
+          "wt": 15
+        },
+        {
+          "finish": 37,
+          "id": 4,
+          "missed": false,
+          "region": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "start": 26,
+          "swaps": 5,
+          "tat": 33,
+          "wt": 22
+        }
+      ],
+      "stats": {
+        "avgTAT": 19.4,
+        "avgWT": 11.2,
+        "makespan": 37,
+        "maxWait": 22,
+        "misses": 3,
+        "swaps": 9,
+        "util": 0.8648648649
+      }
+    }
+  ]
+}
